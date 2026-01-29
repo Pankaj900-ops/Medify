@@ -10,8 +10,25 @@ export default function MyBookings() {
   const [filteredBookings, setFilteredBookings] = useState([]);
 
   useEffect(() => {
-    const localBookings = localStorage.getItem("bookings") || "[]";
-    setBookings(JSON.parse(localBookings));
+    const stored = JSON.parse(localStorage.getItem("bookings") || "[]");
+
+    if (stored.length === 0) {
+      const mockBooking = [
+        {
+          "Hospital Name": "Southeast Alabama Medical Center",
+          City: "DOTHAN",
+          State: "Alabama",
+          "Hospital Type": "Government",
+          "Hospital overall rating": "4.5",
+          bookingDate: new Date().toISOString().split("T")[0],
+          bookingTime: "10:30 AM",
+        },
+      ];
+      localStorage.setItem("bookings", JSON.stringify(mockBooking));
+      setBookings(mockBooking);
+    } else {
+      setBookings(stored);
+    }
   }, []);
 
   useEffect(() => {
@@ -21,9 +38,9 @@ export default function MyBookings() {
   return (
     <>
       <NavBar />
-      <Box
-        sx={{ background: "linear-gradient(#EFF5FE, rgba(241,247,255,0.47))" }}
-      >
+
+      <Box sx={{ background: "linear-gradient(#EFF5FE, rgba(241,247,255,0.47))" }}>
+        {/* HEADER */}
         <Box
           mb="50px"
           pt={{ xs: 3, md: 1 }}
@@ -49,6 +66,7 @@ export default function MyBookings() {
               >
                 My Bookings
               </Typography>
+
               <Box
                 bgcolor="#fff"
                 p={3}
@@ -64,6 +82,7 @@ export default function MyBookings() {
           </Container>
         </Box>
 
+        {/* CONTENT */}
         <Container maxWidth="xl" sx={{ pt: 8, pb: 10, px: { xs: 0, md: 4 } }}>
           <Stack alignItems="flex-start" direction={{ md: "row" }}>
             <Stack
@@ -72,23 +91,27 @@ export default function MyBookings() {
               width={{ xs: 1, md: "calc(100% - 384px)" }}
               mr="24px"
             >
-              {filteredBookings.length > 0 &&
+              {filteredBookings.length > 0 ? (
                 filteredBookings.map((hospital) => (
                   <HospitalCard
                     key={hospital["Hospital Name"]}
                     details={hospital}
                     booking={true}
                   />
-                ))}
-
-              {filteredBookings.length == 0 && (
-                <Typography variant="h3" bgcolor="#fff" p={3} borderRadius={2}>
+                ))
+              ) : (
+                <Typography
+                  component="h3"
+                  bgcolor="#fff"
+                  p={3}
+                  borderRadius={2}
+                >
                   No Bookings Found!
                 </Typography>
               )}
             </Stack>
 
-            <img src={cta} width={360} height="auto" />
+            <img src={cta} width={360} height="auto" alt="CTA" />
           </Stack>
         </Container>
       </Box>

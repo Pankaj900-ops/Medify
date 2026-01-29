@@ -1,51 +1,78 @@
-import { Stack, TextField, Button } from "@mui/material";
-import { useState, useMemo } from "react";
-import SearchIcon from "@mui/icons-material/Search";
+import { useState, useEffect } from "react";
+import { Box, MenuItem, Select, Button } from "@mui/material";
 
 export default function SearchBar({ list, filterList }) {
-  const [inputText, setInputText] = useState("");
+  const [state, setState] = useState("");
+  const [city, setCity] = useState("");
+  const [cities, setCities] = useState([]);
 
-  const filteredList = useMemo(() => {
-    if (!inputText.trim()) return list;
-    return list.filter((item) =>
-      item["Hospital Name"]
-        .toLowerCase()
-        .includes(inputText.trim().toLowerCase())
+  // Mock state-city mapping (update as per your backend)
+  const stateCityMap = {
+    Alabama: ["DOTHAN", "MONTGOMERY", "BIRMINGHAM"],
+    California: ["LOS ANGELES", "SAN FRANCISCO", "SAN DIEGO"],
+  };
+
+  useEffect(() => {
+    if (state) {
+      setCities(stateCityMap[state] || []);
+      setCity(""); // reset city when state changes
+    }
+  }, [state]);
+
+  const handleSearch = () => {
+    // Filter bookings based on selected state & city
+    const filtered = list.filter(
+      (item) =>
+        item.State.toLowerCase() === state.toLowerCase() &&
+        item.City.toLowerCase() === city.toLowerCase()
     );
-  }, [inputText, list]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    filterList(filteredList);
+    filterList(filtered);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Stack direction="row" spacing={2}>
-        <TextField
-          type="text"
-          label="Search By Hospital"
-          variant="outlined"
-          fullWidth
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          slotProps={{
-            input: {
-              maxLength: 100,
-            },
-          }}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-          startIcon={<SearchIcon />}
-          sx={{ py: "15px", px: 8, flexShrink: 0 }}
-          disableElevation
-        >
-          Search
-        </Button>
-      </Stack>
-    </form>
+    <Box display="flex" gap={2} flexDirection={{ xs: "column", md: "row" }}>
+      <Select
+        id="state"
+        value={state}
+        displayEmpty
+        onChange={(e) => setState(e.target.value)}
+      >
+        <MenuItem value="" disabled>
+          Select State
+        </MenuItem>
+        {Object.keys(stateCityMap).map((st) => (
+          <MenuItem key={st} value={st}>
+            {st}
+          </MenuItem>
+        ))}
+      </Select>
+
+      <Select
+        id="city"
+        value={city}
+        displayEmpty
+        onChange={(e) => setCity(e.target.value)}
+        disabled={!state}
+      >
+        <MenuItem value="" disabled>
+          Select City
+        </MenuItem>
+        {cities.map((c) => (
+          <MenuItem key={c} value={c}>
+            {c}
+          </MenuItem>
+        ))}
+      </Select>
+
+      <Button
+        id="searchBtn"
+        variant="contained"
+        color="primary"
+        onClick={handleSearch}
+        disabled={!state || !city}
+      >
+        Search
+      </Button>
+    </Box>
   );
 }
