@@ -69,6 +69,7 @@ export default function SearchBar({ list, filterList }) {
         variant="contained"
         color="primary"
         onClick={handleSearch}
+        sx={{ py: "15px", px: 8, flexShrink: 0 }}
         disabled={!state || !city}
       >
         Search
